@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Финансы — трекер доходов и расходов</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <!--
+    Тексты интерфейса переводятся из словаря в script.js:
+    data-i18n="ключ" — текст элемента, data-i18n-attr="атрибут=ключ;…" — атрибуты.
+  -->
+  <div class="app">
+    <!-- Плавающая навигация: панель-«пилюля» с вкладками + отдельная круглая кнопка добавления -->
+    <div class="navbar">
+    <nav class="tabbar" id="tabbar" data-i18n-attr="aria-label=nav.aria">
+      <span class="tab-pill" aria-hidden="true"></span>
+      <button class="tab active" data-view="dashboard" data-i18n-attr="aria-label=nav.dashboard;title=nav.dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg>
+        <span class="tab-label" data-i18n="nav.dashboard">Дашборд</span>
+      </button>
+      <button class="tab" data-view="transactions" data-i18n-attr="aria-label=nav.transactions;title=nav.transactions">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg>
+        <span class="tab-label" data-i18n="nav.transactions">Операции</span>
+      </button>
+      <button class="tab" data-view="categories" data-i18n-attr="aria-label=nav.categories;title=nav.categories">
+        <svg viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 011-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+        <span class="tab-label" data-i18n="nav.categories">Категории</span>
+      </button>
+      <button class="tab" data-view="settings" data-i18n-attr="aria-label=nav.settings;title=nav.settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+        <span class="tab-label" data-i18n="nav.settings">Настройки</span>
+      </button>
+    </nav>
+    <button class="nav-add" data-action="add-transaction" data-i18n-attr="aria-label=nav.add;title=nav.add">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    </div>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="brand">
+          <span class="logo-mark" data-i18n="app.mark">Ф</span>
+          <span class="logo-text" data-i18n="app.name">Финансы</span>
+        </div>
+        <!-- Переключатель языка: стеклянная капсула со скользящей подложкой -->
+        <div class="lang-switch" id="langSwitch" role="radiogroup" data-lang="ru" data-i18n-attr="aria-label=lang.label">
+          <span class="lang-pill" aria-hidden="true"></span>
+          <button type="button" role="radio" data-lang="ru" aria-checked="true" title="Русский">RU</button>
+          <button type="button" role="radio" data-lang="uz" aria-checked="false" title="O‘zbekcha">UZ</button>
+        </div>
+      </div>
+      <!-- ===== ДАШБОРД ===== -->
+      <section class="view active" id="view-dashboard">
+        <header class="view-header">
+          <div>
+            <h1 data-i18n="dash.title">Дашборд</h1>
+            <p class="muted" data-i18n="dash.subtitle">Обзор ваших доходов и расходов</p>
+          </div>
+          <div class="header-actions">
+            <select id="dashPeriod" class="input input-sm" data-i18n-attr="aria-label=dash.period">
+              <option value="month" data-i18n="period.month">Этот месяц</option>
+              <option value="3m" data-i18n="period.3m">3 месяца</option>
+              <option value="6m" selected data-i18n="period.6m">6 месяцев</option>
+              <option value="year" data-i18n="period.year">Этот год</option>
+              <option value="all" data-i18n="period.all">Всё время</option>
+            </select>
+            <button class="btn btn-success" data-action="add-income" data-i18n="btn.addIncome">+ Доход</button>
+            <button class="btn btn-danger" data-action="add-expense" data-i18n="btn.addExpense">+ Расход</button>
+          </div>
+        </header>
+
+        <div class="stats">
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="stat.balance">Баланс</span>
+            <strong class="stat-value" id="statBalance">0</strong>
+            <span class="stat-sub" id="statBalanceSub"></span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label"><i class="dot dot-income"></i><span data-i18n="common.income">Доходы</span></span>
+            <strong class="stat-value income" id="statIncome">0</strong>
+            <span class="stat-sub" id="statIncomeCount"></span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label"><i class="dot dot-expense"></i><span data-i18n="common.expense">Расходы</span></span>
+            <strong class="stat-value expense" id="statExpense">0</strong>
+            <span class="stat-sub" id="statExpenseCount"></span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label" data-i18n="stat.savings">Норма сбережений</span>
+            <strong class="stat-value" id="statSavings">0%</strong>
+            <span class="stat-sub" data-i18n="stat.savingsHint">доля дохода, оставшаяся после расходов</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card card-wide">
+            <div class="card-head">
+              <h2 data-i18n="chart.byMonth">Доходы и расходы по месяцам</h2>
+              <div class="legend-inline">
+                <span><i class="dot dot-income"></i><span data-i18n="common.income">Доходы</span></span>
+                <span><i class="dot dot-expense"></i><span data-i18n="common.expense">Расходы</span></span>
+              </div>
+            </div>
+            <div class="chart" id="barChart"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2 data-i18n="chart.structure">Структура</h2>
+              <div class="segmented" id="donutType">
+                <button class="seg active" data-type="expense" data-i18n="common.expense">Расходы</button>
+                <button class="seg" data-type="income" data-i18n="common.income">Доходы</button>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <div class="chart chart-donut" id="donutChart"></div>
+              <ul class="donut-legend" id="donutLegend"></ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2 data-i18n="chart.balance">Динамика баланса</h2>
+            </div>
+            <div class="chart" id="lineChart"></div>
+          </div>
+
+          <div class="card card-wide">
+            <div class="card-head">
+              <h2 data-i18n="recent.title">Последние операции</h2>
+              <button class="btn btn-ghost btn-sm" data-goto="transactions" data-i18n="recent.all">Все операции →</button>
+            </div>
+            <ul class="recent-list" id="recentList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ОПЕРАЦИИ ===== -->
+      <section class="view" id="view-transactions">
+        <header class="view-header">
+          <div>
+            <h1 data-i18n="tx.title">Операции</h1>
+            <p class="muted" data-i18n="tx.subtitle">Добавление, просмотр, редактирование и удаление</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" data-action="add-transaction" data-i18n="tx.add">+ Добавить</button>
+          </div>
+        </header>
+
+        <div class="card filters">
+          <input type="search" id="fSearch" class="input" data-i18n-attr="placeholder=tx.search;aria-label=tx.search">
+          <select id="fType" class="input">
+            <option value="all" data-i18n="tx.allTypes">Все типы</option>
+            <option value="income" data-i18n="common.income">Доходы</option>
+            <option value="expense" data-i18n="common.expense">Расходы</option>
+          </select>
+          <select id="fCategory" class="input">
+            <option value="all" data-i18n="tx.allCats">Все категории</option>
+          </select>
+          <input type="month" id="fMonth" class="input" data-i18n-attr="aria-label=tx.month">
+          <select id="fSort" class="input">
+            <option value="date-desc" data-i18n="sort.new">Сначала новые</option>
+            <option value="date-asc" data-i18n="sort.old">Сначала старые</option>
+            <option value="amount-desc" data-i18n="sort.amountDesc">Сумма ↓</option>
+            <option value="amount-asc" data-i18n="sort.amountAsc">Сумма ↑</option>
+          </select>
+          <button class="btn btn-ghost" id="fReset" data-i18n="tx.reset">Сбросить</button>
+        </div>
+
+        <div class="card table-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th data-i18n="col.date">Дата</th>
+                <th data-i18n="col.category">Категория</th>
+                <th data-i18n="col.note">Описание</th>
+                <th class="num" data-i18n="col.amount">Сумма</th>
+                <th class="actions-col"></th>
+              </tr>
+            </thead>
+            <tbody id="txBody"></tbody>
+          </table>
+          <div class="empty" id="txEmpty" hidden>
+            <p></p>
+            <button class="btn btn-primary" data-action="add-transaction" data-i18n="tx.addFirst">Добавить первую операцию</button>
+          </div>
+          <div class="table-foot" id="txFoot"></div>
+        </div>
+      </section>
+
+      <!-- ===== КАТЕГОРИИ ===== -->
+      <section class="view" id="view-categories">
+        <header class="view-header">
+          <div>
+            <h1 data-i18n="cats.title">Категории</h1>
+            <p class="muted" data-i18n="cats.subtitle">Управление категориями доходов и расходов</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" data-action="add-category" data-i18n="cats.new">+ Новая категория</button>
+          </div>
+        </header>
+
+        <div class="grid-cats">
+          <div class="card">
+            <div class="card-head"><h2><i class="dot dot-income"></i><span data-i18n="cats.income">Категории доходов</span></h2></div>
+            <ul class="cat-list" id="catIncome"></ul>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2><i class="dot dot-expense"></i><span data-i18n="cats.expense">Категории расходов</span></h2></div>
+            <ul class="cat-list" id="catExpense"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== НАСТРОЙКИ ===== -->
+      <section class="view" id="view-settings">
+        <header class="view-header">
+          <div>
+            <h1 data-i18n="settings.title">Настройки</h1>
+            <p class="muted" data-i18n="settings.subtitle">Валюта, оформление и управление данными</p>
+          </div>
+        </header>
+
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-head"><h2 data-i18n="settings.currency">Валюта</h2></div>
+            <label class="field">
+              <span data-i18n="settings.displayCurrency">Валюта отображения</span>
+              <select id="sCurrency" class="input"></select>
+            </label>
+            <p class="hint" data-i18n="settings.ratesHint">Все суммы хранятся в сумах и пересчитываются по курсу ниже. Курс — сколько сумов стоит 1 единица валюты.</p>
+            <div class="rates" id="sRates"></div>
+            <button class="btn btn-primary" id="sSaveRates" data-i18n="settings.saveRates">Сохранить курсы</button>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2 data-i18n="settings.appearance">Оформление</h2></div>
+            <label class="field">
+              <span data-i18n="settings.theme">Тема</span>
+              <select id="sTheme" class="input">
+                <option value="auto" data-i18n="theme.auto">Как в системе</option>
+                <option value="light" data-i18n="theme.light">Светлая</option>
+                <option value="dark" data-i18n="theme.dark">Тёмная</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2 data-i18n="settings.data">Данные</h2></div>
+            <p class="hint" data-i18n="settings.dataHint">Данные хранятся локально в браузере (localStorage).</p>
+            <div class="stack">
+              <button class="btn btn-ghost" id="sExport" data-i18n="settings.export">⬇ Экспорт в JSON</button>
+              <label class="btn btn-ghost file-btn">
+                <span data-i18n="settings.import">⬆ Импорт из JSON</span>
+                <input type="file" id="sImport" accept="application/json,.json" hidden>
+              </label>
+              <button class="btn btn-ghost" id="sDemo" data-i18n="settings.demo">✨ Заполнить демо-данными</button>
+              <button class="btn btn-danger-outline" id="sReset" data-i18n="settings.reset">🗑 Удалить все данные</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== Модалка операции ===== -->
+  <div class="modal" id="txModal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <form class="modal-dialog" id="txForm" novalidate>
+      <div class="modal-head">
+        <h3 id="txModalTitle"></h3>
+        <button type="button" class="icon-btn" data-close data-i18n-attr="aria-label=modal.close">✕</button>
+      </div>
+      <input type="hidden" id="txId">
+      <div class="segmented segmented-lg" id="txType" data-active="income">
+        <button type="button" class="seg seg-income active" data-type="income" data-i18n="common.incomeOne">Доход</button>
+        <button type="button" class="seg seg-expense" data-type="expense" data-i18n="common.expenseOne">Расход</button>
+      </div>
+      <label class="field">
+        <span><span data-i18n="field.amount">Сумма,</span> <b class="cur-label"></b></span>
+        <input type="text" inputmode="decimal" id="txAmount" class="input input-lg" placeholder="0" autocomplete="off" required>
+        <small class="error" data-for="txAmount"></small>
+      </label>
+      <label class="field">
+        <span data-i18n="field.category">Категория</span>
+        <select id="txCategory" class="input" required></select>
+        <small class="error" data-for="txCategory"></small>
+      </label>
+      <label class="field">
+        <span data-i18n="field.date">Дата</span>
+        <input type="date" id="txDate" class="input" required>
+        <small class="error" data-for="txDate"></small>
+      </label>
+      <label class="field">
+        <span data-i18n="field.note">Описание</span>
+        <input type="text" id="txNote" class="input" maxlength="120" data-i18n-attr="placeholder=field.optional">
+      </label>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-danger-outline" id="txDelete" hidden data-i18n="btn.delete">Удалить</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" data-close data-i18n="btn.cancel">Отмена</button>
+        <button type="submit" class="btn btn-primary" data-i18n="btn.save">Сохранить</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Модалка категории ===== -->
+  <div class="modal" id="catModal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <form class="modal-dialog modal-sm" id="catForm" novalidate>
+      <div class="modal-head">
+        <h3 id="catModalTitle"></h3>
+        <button type="button" class="icon-btn" data-close data-i18n-attr="aria-label=modal.close">✕</button>
+      </div>
+      <input type="hidden" id="catId">
+      <div class="segmented segmented-lg" id="catType" data-active="expense">
+        <button type="button" class="seg seg-income" data-type="income" data-i18n="common.incomeOne">Доход</button>
+        <button type="button" class="seg seg-expense active" data-type="expense" data-i18n="common.expenseOne">Расход</button>
+      </div>
+      <label class="field">
+        <span data-i18n="field.name">Название</span>
+        <input type="text" id="catName" class="input" maxlength="40" required>
+        <small class="error" data-for="catName"></small>
+      </label>
+      <div class="field">
+        <span data-i18n="field.color">Цвет</span>
+        <div class="swatches" id="catColors"></div>
+      </div>
+      <div class="modal-foot">
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" data-close data-i18n="btn.cancel">Отмена</button>
+        <button type="submit" class="btn btn-primary" data-i18n="btn.save">Сохранить</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Подтверждение ===== -->
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-dialog modal-sm">
+      <div class="modal-head">
+        <h3 id="confirmTitle"></h3>
+      </div>
+      <p id="confirmText"></p>
+      <div class="modal-foot">
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" data-close data-i18n="btn.cancel">Отмена</button>
+        <button type="button" class="btn btn-danger" id="confirmOk"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip" hidden></div>
+  <div class="toasts" id="toasts"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
