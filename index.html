@@ -269,6 +269,15 @@
               <button class="btn btn-ghost" id="sDemo" data-i18n="settings.demo">✨ Заполнить демо-данными</button>
               <button class="btn btn-danger-outline" id="sReset" data-i18n="settings.reset">🗑 Удалить все данные</button>
             </div>
+            <a class="privacy-link" href="privacy.html" target="_blank" rel="noopener" data-i18n="privacy.link">Политика конфиденциальности</a>
+          </div>
+
+          <!-- Аккаунт: виден, когда пользователь вошёл -->
+          <div class="card" id="accountCard" hidden>
+            <div class="card-head"><h2 data-i18n="account.title">Аккаунт</h2></div>
+            <p class="account-card-email" id="accountCardEmail"></p>
+            <p class="hint" data-i18n="account.deleteHint">Удаление стирает аккаунт и все ваши операции без возможности восстановления.</p>
+            <button class="btn btn-danger-outline" id="deleteAccountBtn" data-i18n="account.delete">Удалить аккаунт</button>
           </div>
         </div>
       </section>
@@ -326,6 +335,7 @@
         <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Войти</button>
         <button type="button" class="auth-link auth-resend" id="authResend" hidden></button>
       </form>
+      <a class="privacy-link auth-privacy" href="privacy.html" target="_blank" rel="noopener" data-i18n="privacy.link">Политика конфиденциальности</a>
     </div>
   </section>
 
@@ -396,6 +406,28 @@
         <span class="spacer"></span>
         <button type="button" class="btn btn-ghost" data-close data-i18n="btn.cancel">Отмена</button>
         <button type="submit" class="btn btn-primary" data-i18n="btn.save">Сохранить</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Удаление аккаунта: подтверждение паролем ===== -->
+  <div class="modal" id="deleteModal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <form class="modal-dialog modal-sm" id="deleteForm" novalidate>
+      <div class="modal-head">
+        <h3 data-i18n="account.deleteTitle">Удалить аккаунт навсегда?</h3>
+        <button type="button" class="icon-btn" data-close data-i18n-attr="aria-label=modal.close">✕</button>
+      </div>
+      <p class="delete-warning" data-i18n="account.deleteText">Аккаунт, все операции, категории и настройки будут удалены без возможности восстановления. Чтобы подтвердить, введите пароль.</p>
+      <label class="field">
+        <span data-i18n="auth.password">Пароль</span>
+        <input type="password" id="deletePassword" class="input" autocomplete="current-password" maxlength="200">
+        <small class="error" id="deleteError" role="alert"></small>
+      </label>
+      <div class="modal-foot">
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" data-close data-i18n="btn.cancel">Отмена</button>
+        <button type="submit" class="btn btn-danger" id="deleteConfirm" data-i18n="account.deleteConfirm">Удалить навсегда</button>
       </div>
     </form>
   </div>

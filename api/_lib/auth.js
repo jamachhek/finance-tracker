@@ -30,6 +30,7 @@ const sign = payload => createHmac('sha256', secret()).update(payload).digest('b
 
 /** version — версия сессий пользователя: после смены пароля она растёт и старые cookie недействительны */
 export function sessionCookie(userId, version = 0) {
+  userId = Number(userId); // страховка: id из базы может прийти строкой
   const payload = Buffer.from(JSON.stringify({ uid: userId, v: version, exp: Date.now() + MAX_AGE * 1000 })).toString('base64url');
   return `${COOKIE}=${payload}.${sign(payload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${MAX_AGE}`;
 }

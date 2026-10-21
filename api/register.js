@@ -18,7 +18,8 @@ export default async function handler(req, res) {
       returning id`;
     if (!rows.length) return send(res, 409, { error: 'email_taken' });
 
-    send(res, 201, { user: { email } }, sessionCookie(rows[0].id));
+    // Neon отдаёт bigint строкой — в пропуск кладём число, иначе вход сразу после регистрации не засчитывается
+    send(res, 201, { user: { email } }, sessionCookie(Number(rows[0].id), 0));
   } catch (err) {
     fail(res, err);
   }

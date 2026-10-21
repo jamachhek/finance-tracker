@@ -1227,3 +1227,25 @@ body.auth-mode .app { visibility: hidden; }
   font-variant-numeric: tabular-nums;
 }
 .input.auth-code::placeholder { color: var(--muted); opacity: .5; }
+
+/* ---------- Аккаунт в настройках и политика конфиденциальности ---------- */
+.privacy-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.privacy-link:hover { color: var(--primary); }
+.auth-privacy { display: block; margin: 16px auto 0; text-align: center; }
+.account-card-email { margin: 0 0 6px; font-weight: 650; overflow-wrap: anywhere; }
+.delete-warning {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--expense-soft);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}

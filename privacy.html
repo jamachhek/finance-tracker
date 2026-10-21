@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Политика конфиденциальности — Финансы</title>
+  <link rel="stylesheet" href="main.css">
+  <style>
+    .policy { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
+    .policy .card { padding-top: 28px; padding-bottom: 28px; }
+    .policy h1 { font-size: 26px; margin-bottom: 6px; }
+    .policy h2 { font-size: 17px; margin: 26px 0 8px; display: block; }
+    .policy p, .policy li { line-height: 1.6; color: var(--text); }
+    .policy ul { margin: 6px 0; padding-left: 20px; }
+    .policy li { margin: 4px 0; }
+    .policy .updated { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+    .policy-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+    .policy-top a { text-decoration: none; color: inherit; }
+    [data-lang-block] { display: none; }
+    html[lang="ru"] [data-lang-block="ru"], html[lang="uz"] [data-lang-block="uz"] { display: block; }
+  </style>
+</head>
+<body>
+  <main class="policy">
+    <div class="policy-top">
+      <a class="brand" href="./">
+        <span class="logo-mark" id="mark">Ф</span>
+        <span class="logo-text" id="appName">Финансы</span>
+      </a>
+      <div class="lang-switch" role="radiogroup" aria-label="Язык / Til" data-lang="ru">
+        <span class="lang-pill" aria-hidden="true"></span>
+        <button type="button" role="radio" data-lang="ru">RU</button>
+        <button type="button" role="radio" data-lang="uz">UZ</button>
+      </div>
+    </div>
+
+    <!-- ===================== РУССКИЙ ===================== -->
+    <article class="card" data-lang-block="ru">
+      <h1>Политика конфиденциальности</h1>
+      <p class="updated">Действует с 21 октября 2026 г.</p>
+      <p>Приложение «Финансы» помогает вести учёт доходов и расходов. Здесь простыми словами описано, какие данные мы собираем, зачем и как вы можете их удалить.</p>
+
+      <h2>Какие данные мы собираем</h2>
+      <ul>
+        <li><b>Адрес электронной почты</b> — чтобы создать аккаунт, войти в него и прислать код для смены пароля.</li>
+        <li><b>Пароль</b> — хранится только в виде необратимого хеша (scrypt). Сам пароль не знает никто, включая разработчика.</li>
+        <li><b>Финансовые записи, которые вы вводите сами</b>: операции (сумма, дата, категория, описание), категории, курсы валют и настройки (язык, тема, валюта).</li>
+        <li><b>Коды для смены пароля</b> — хранятся в зашифрованном виде 15 минут и после использования больше не действуют.</li>
+      </ul>
+      <p>Мы <b>не</b> собираем номера банковских карт, данные паспорта, геолокацию, контакты, фото и не подключаем рекламу или сторонние системы аналитики.</p>
+
+      <h2>Зачем нужны данные</h2>
+      <ul>
+        <li>чтобы ваши записи были доступны после входа с любого устройства;</li>
+        <li>чтобы защитить аккаунт паролем и дать возможность его восстановить.</li>
+      </ul>
+      <p>Мы не продаём и не передаём ваши данные третьим лицам для рекламы или любых других целей.</p>
+
+      <h2>Где хранятся данные и кто их обрабатывает</h2>
+      <ul>
+        <li><b>Neon</b> (neon.tech) — база данных, где хранятся аккаунт и записи. Серверы в США.</li>
+        <li><b>Vercel</b> (vercel.com) — хостинг сайта и серверной части, через него проходят запросы приложения.</li>
+        <li><b>Resend</b> (resend.com) — отправляет письма с кодом для смены пароля; получает только адрес почты и сам код.</li>
+      </ul>
+      <p>Данные передаются только по защищённому соединению HTTPS.</p>
+
+      <h2>Файлы cookie и данные на устройстве</h2>
+      <p>Используется одна служебная cookie — «пропуск» после входа, чтобы не вводить пароль каждый раз. Она недоступна скриптам страницы и действует 30 дней или до выхода из аккаунта. Копия ваших записей также хранится в памяти браузера на устройстве, чтобы приложение быстро открывалось; при выходе из аккаунта она стирается.</p>
+
+      <h2>Сколько хранятся данные</h2>
+      <p>Пока у вас есть аккаунт. После удаления аккаунта все данные удаляются сразу и безвозвратно.</p>
+
+      <h2>Как удалить аккаунт и данные</h2>
+      <ol>
+        <li>Войдите в приложение.</li>
+        <li>Откройте <b>Настройки → Аккаунт → «Удалить аккаунт»</b>.</li>
+        <li>Подтвердите паролем.</li>
+      </ol>
+      <p>Удаляются аккаунт, все операции, категории, настройки и коды восстановления. Если вы не помните пароль, сначала смените его через «Забыли пароль?» на экране входа.</p>
+
+      <h2>Дети</h2>
+      <p>Приложение не предназначено для детей младше 13 лет, и мы сознательно не собираем их данные.</p>
+
+      <h2>Изменения политики</h2>
+      <p>Если политика изменится, новая версия появится на этой странице с новой датой вступления в силу.</p>
+
+      <h2>Связаться с нами</h2>
+      <p>По вопросам о ваших данных пишите на адрес разработчика, указанный на странице приложения в Google Play.</p>
+    </article>
+
+    <!-- ===================== O‘ZBEKCHA ===================== -->
+    <article class="card" data-lang-block="uz">
+      <h1>Maxfiylik siyosati</h1>
+      <p class="updated">2026-yil 21-oktabrdan amal qiladi.</p>
+      <p>«Moliya» ilovasi daromad va xarajatlarni hisobga olishga yordam beradi. Bu yerda qanday ma’lumotlarni yig‘ishimiz, nima uchun va ularni qanday o‘chirishingiz mumkinligi oddiy so‘zlar bilan tushuntirilgan.</p>
+
+      <h2>Qanday ma’lumotlar yig‘iladi</h2>
+      <ul>
+        <li><b>Elektron pochta manzili</b> — hisob yaratish, unga kirish va parolni almashtirish kodini yuborish uchun.</li>
+        <li><b>Parol</b> — faqat qaytarib bo‘lmaydigan xesh (scrypt) ko‘rinishida saqlanadi. Parolning o‘zini hech kim, jumladan dasturchi ham bilmaydi.</li>
+        <li><b>O‘zingiz kiritadigan moliyaviy yozuvlar</b>: operatsiyalar (summa, sana, kategoriya, tavsif), kategoriyalar, valyuta kurslari va sozlamalar (til, mavzu, valyuta).</li>
+        <li><b>Parolni almashtirish kodlari</b> — shifrlangan holda 15 daqiqa saqlanadi va ishlatilgandan keyin amal qilmaydi.</li>
+      </ul>
+      <p>Biz bank karta raqamlari, pasport ma’lumotlari, joylashuv, kontaktlar va rasmlarni <b>yig‘maymiz</b>, reklama yoki tashqi analitika tizimlarini ulamaymiz.</p>
+
+      <h2>Ma’lumotlar nima uchun kerak</h2>
+      <ul>
+        <li>yozuvlaringiz istalgan qurilmadan kirgandan so‘ng ochilishi uchun;</li>
+        <li>hisobni parol bilan himoyalash va uni tiklash imkonini berish uchun.</li>
+      </ul>
+      <p>Biz ma’lumotlaringizni sotmaymiz va reklama yoki boshqa maqsadlar uchun uchinchi shaxslarga bermaymiz.</p>
+
+      <h2>Ma’lumotlar qayerda saqlanadi va kim ularni qayta ishlaydi</h2>
+      <ul>
+        <li><b>Neon</b> (neon.tech) — hisob va yozuvlar saqlanadigan ma’lumotlar bazasi. Serverlar AQShda.</li>
+        <li><b>Vercel</b> (vercel.com) — sayt va server qismi xostingi, ilova so‘rovlari u orqali o‘tadi.</li>
+        <li><b>Resend</b> (resend.com) — parolni almashtirish kodi bilan xat yuboradi; faqat pochta manzili va kodning o‘zini oladi.</li>
+      </ul>
+      <p>Ma’lumotlar faqat himoyalangan HTTPS ulanishi orqali uzatiladi.</p>
+
+      <h2>Cookie fayllari va qurilmadagi ma’lumotlar</h2>
+      <p>Bitta xizmat cookie fayli ishlatiladi — har safar parol kiritmaslik uchun kirgandan keyingi «ruxsatnoma». U sahifa skriptlari uchun ochiq emas va 30 kun yoki hisobdan chiqquncha amal qiladi. Ilova tez ochilishi uchun yozuvlaringiz nusxasi qurilmadagi brauzer xotirasida ham saqlanadi; hisobdan chiqilganda u o‘chiriladi.</p>
+
+      <h2>Ma’lumotlar qancha saqlanadi</h2>
+      <p>Hisobingiz mavjud ekan. Hisob o‘chirilgandan so‘ng barcha ma’lumotlar darhol va butunlay o‘chiriladi.</p>
+
+      <h2>Hisob va ma’lumotlarni qanday o‘chirish mumkin</h2>
+      <ol>
+        <li>Ilovaga kiring.</li>
+        <li><b>Sozlamalar → Hisob → «Hisobni o‘chirish»</b> bo‘limini oching.</li>
+        <li>Parol bilan tasdiqlang.</li>
+      </ol>
+      <p>Hisob, barcha operatsiyalar, kategoriyalar, sozlamalar va tiklash kodlari o‘chiriladi. Agar parolni eslamasangiz, avval kirish oynasidagi «Parolni unutdingizmi?» orqali uni almashtiring.</p>
+
+      <h2>Bolalar</h2>
+      <p>Ilova 13 yoshdan kichik bolalar uchun mo‘ljallanmagan va biz ularning ma’lumotlarini ataylab yig‘maymiz.</p>
+
+      <h2>Siyosatdagi o‘zgarishlar</h2>
+      <p>Agar siyosat o‘zgarsa, yangi versiya yangi kuchga kirish sanasi bilan shu sahifada paydo bo‘ladi.</p>
+
+      <h2>Biz bilan bog‘lanish</h2>
+      <p>Ma’lumotlaringiz bo‘yicha savollar bilan Google Play’dagi ilova sahifasida ko‘rsatilgan dasturchi manziliga yozing.</p>
+    </article>
+  </main>
+
+  <script>
+    // язык: ?lang=uz из приложения, иначе русский; тема — как в системе
+    (function () {
+      const html = document.documentElement;
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      html.dataset.theme = dark ? 'dark' : 'light';
+      const titles = { ru: 'Политика конфиденциальности — Финансы', uz: 'Maxfiylik siyosati — Moliya' };
+      const names = { ru: ['Ф', 'Финансы'], uz: ['M', 'Moliya'] };
+      function setLang(l) {
+        if (!titles[l]) l = 'ru';
+        html.lang = l;
+        document.title = titles[l];
+        document.getElementById('mark').textContent = names[l][0];
+        document.getElementById('appName').textContent = names[l][1];
+        const sw = document.querySelector('.lang-switch');
+        sw.dataset.lang = l;
+        sw.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === l)));
+        history.replaceState(null, '', `?lang=${l}`);
+      }
+      document.querySelector('.lang-switch').addEventListener('click', e => {
+        const b = e.target.closest('button[data-lang]');
+        if (b) setLang(b.dataset.lang);
+      });
+      setLang(new URLSearchParams(location.search).get('lang') || 'ru');
+    })();
+  </script>
+</body>
+</html>

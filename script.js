@@ -48,6 +48,15 @@ const I18N = {
     'auth.err.tooMany': 'Слишком много запросов — попробуйте через час',
     'auth.err.mailOff': 'Отправка писем ещё не настроена',
     'toast.passwordChanged': 'Пароль изменён — вы вошли в аккаунт',
+    'privacy.link': 'Политика конфиденциальности',
+    'account.title': 'Аккаунт',
+    'account.deleteHint': 'Удаление стирает аккаунт и все ваши операции без возможности восстановления.',
+    'account.delete': 'Удалить аккаунт',
+    'account.deleteTitle': 'Удалить аккаунт навсегда?',
+    'account.deleteText': 'Аккаунт, все операции, категории и настройки будут удалены без возможности восстановления. Чтобы подтвердить, введите пароль.',
+    'account.deleteConfirm': 'Удалить навсегда',
+    'account.err.password': 'Неверный пароль',
+    'toast.accountDeleted': 'Аккаунт и все данные удалены',
     'auth.submitLogin': 'Войти',
     'auth.submitRegister': 'Создать аккаунт',
     'auth.busy': 'Подождите…',
@@ -298,6 +307,15 @@ const I18N = {
     'auth.err.tooMany': 'So‘rovlar juda ko‘p — bir soatdan keyin urinib ko‘ring',
     'auth.err.mailOff': 'Xat yuborish hali sozlanmagan',
     'toast.passwordChanged': 'Parol almashtirildi — hisobga kirdingiz',
+    'privacy.link': 'Maxfiylik siyosati',
+    'account.title': 'Hisob',
+    'account.deleteHint': 'O‘chirish hisobni va barcha operatsiyalaringizni qayta tiklab bo‘lmaydigan qilib o‘chiradi.',
+    'account.delete': 'Hisobni o‘chirish',
+    'account.deleteTitle': 'Hisob butunlay o‘chirilsinmi?',
+    'account.deleteText': 'Hisob, barcha operatsiyalar, kategoriyalar va sozlamalar qayta tiklab bo‘lmaydigan qilib o‘chiriladi. Tasdiqlash uchun parolni kiriting.',
+    'account.deleteConfirm': 'Butunlay o‘chirish',
+    'account.err.password': 'Parol noto‘g‘ri',
+    'toast.accountDeleted': 'Hisob va barcha ma’lumotlar o‘chirildi',
     'auth.submitLogin': 'Kirish',
     'auth.submitRegister': 'Hisob yaratish',
     'auth.busy': 'Kuting…',
@@ -2027,6 +2045,8 @@ function translateStatic() {
   });
   // заголовок, подпись и кнопка экрана входа зависят от режима
   translateAuth();
+  // политика открывается на текущем языке
+  $$('.privacy-link').forEach(a => { a.href = `privacy.html?lang=${lang()}`; });
 }
 
 /** Применяет язык ко всему приложению */
@@ -2277,10 +2297,54 @@ function renderAccount() {
   box.hidden = !Cloud.user;
   if (!Cloud.user) return;
   $('#accountEmail').textContent = Cloud.user.email;
+  $('#accountCard').hidden = false;
+  $('#accountCardEmail').textContent = Cloud.user.email;
   $('#accountAvatar').textContent = Cloud.user.email.charAt(0).toUpperCase();
   // в настройках — подсказка, что данные теперь в облаке
   $('#dataHint').dataset.i18n = 'settings.cloudHint';
 }
+
+/* ---------- Удаление аккаунта (требование Google Play: пользователь может удалить аккаунт сам) ---------- */
+$('#deleteAccountBtn').addEventListener('click', () => {
+  $('#deletePassword').value = '';
+  $('#deletePassword').classList.remove('invalid');
+  $('#deleteError').textContent = '';
+  openModal($('#deleteModal'));
+});
+
+$('#deleteForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const password = $('#deletePassword').value;
+  const error = $('#deleteError');
+  error.textContent = '';
+  if (!password) { error.textContent = t('account.err.password'); $('#deletePassword').focus(); return; }
+
+  const btn = $('#deleteConfirm');
+  btn.disabled = true;
+  btn.textContent = t('auth.busy');
+  try {
+    clearTimeout(Cloud.timer); // несохранённые правки удаляемого аккаунта больше не отправляем
+    Cloud.timer = null;
+    const r = await Cloud.request('delete-account', { method: 'POST', body: { password } });
+    if (!r.ok) {
+      error.textContent = t(r.data.error === 'wrong_password' ? 'account.err.password' : 'auth.err.network');
+      $('#deletePassword').classList.add('invalid');
+      $('#deletePassword').select();
+      return;
+    }
+    // копия данных аккаунта на этом устройстве тоже стирается
+    try { localStorage.removeItem(Store.key()); } catch { /* ничего страшного */ }
+    Cloud.user = null;
+    closeModal($('#deleteModal'));
+    toast(t('toast.accountDeleted'));
+    setTimeout(() => location.reload(), 1200); // на экран входа
+  } catch {
+    error.textContent = t('auth.err.network');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t('account.deleteConfirm');
+  }
+});
 
 $('#logoutBtn').addEventListener('click', async () => {
   await Cloud.flush();
