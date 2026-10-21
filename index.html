@@ -6,7 +6,7 @@
   <title>Финансы — трекер доходов и расходов</title>
   <link rel="stylesheet" href="main.css">
 </head>
-<body>
+<body class="booting">
   <!--
     Тексты интерфейса переводятся из словаря в script.js:
     data-i18n="ключ" — текст элемента, data-i18n-attr="атрибут=ключ;…" — атрибуты.
@@ -44,11 +44,21 @@
           <span class="logo-mark" data-i18n="app.mark">Ф</span>
           <span class="logo-text" data-i18n="app.name">Финансы</span>
         </div>
-        <!-- Переключатель языка: стеклянная капсула со скользящей подложкой -->
-        <div class="lang-switch" id="langSwitch" role="radiogroup" data-lang="ru" data-i18n-attr="aria-label=lang.label">
-          <span class="lang-pill" aria-hidden="true"></span>
-          <button type="button" role="radio" data-lang="ru" aria-checked="true" title="Русский">RU</button>
-          <button type="button" role="radio" data-lang="uz" aria-checked="false" title="O‘zbekcha">UZ</button>
+        <div class="topbar-right">
+          <!-- Аккаунт: почта и выход (виден, когда пользователь вошёл) -->
+          <div class="account" id="account" hidden>
+            <span class="account-avatar" id="accountAvatar" aria-hidden="true"></span>
+            <span class="account-email" id="accountEmail"></span>
+            <button type="button" class="account-logout" id="logoutBtn" data-i18n-attr="title=auth.logout;aria-label=auth.logout">
+              <svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>
+            </button>
+          </div>
+          <!-- Переключатель языка: стеклянная капсула со скользящей подложкой -->
+          <div class="lang-switch" id="langSwitch" role="radiogroup" data-lang="ru" data-i18n-attr="aria-label=lang.label">
+            <span class="lang-pill" aria-hidden="true"></span>
+            <button type="button" role="radio" data-lang="ru" aria-checked="true" title="Русский">RU</button>
+            <button type="button" role="radio" data-lang="uz" aria-checked="false" title="O‘zbekcha">UZ</button>
+          </div>
         </div>
       </div>
       <!-- ===== ДАШБОРД ===== -->
@@ -249,7 +259,7 @@
 
           <div class="card">
             <div class="card-head"><h2 data-i18n="settings.data">Данные</h2></div>
-            <p class="hint" data-i18n="settings.dataHint">Данные хранятся локально в браузере (localStorage).</p>
+            <p class="hint" id="dataHint" data-i18n="settings.dataHint">Данные хранятся локально в браузере (localStorage).</p>
             <div class="stack">
               <button class="btn btn-ghost" id="sExport" data-i18n="settings.export">⬇ Экспорт в JSON</button>
               <label class="btn btn-ghost file-btn">
@@ -264,6 +274,42 @@
       </section>
     </main>
   </div>
+
+  <!-- ===== Вход и регистрация (когда приложение работает с облаком) ===== -->
+  <section class="auth" id="authScreen" hidden>
+    <div class="auth-card">
+      <div class="auth-top">
+        <div class="brand">
+          <span class="logo-mark" data-i18n="app.mark">Ф</span>
+          <span class="logo-text" data-i18n="app.name">Финансы</span>
+        </div>
+        <div class="lang-switch" role="radiogroup" data-lang="ru" data-i18n-attr="aria-label=lang.label">
+          <span class="lang-pill" aria-hidden="true"></span>
+          <button type="button" role="radio" data-lang="ru" aria-checked="true" title="Русский">RU</button>
+          <button type="button" role="radio" data-lang="uz" aria-checked="false" title="O‘zbekcha">UZ</button>
+        </div>
+      </div>
+      <h1 id="authTitle">Вход в аккаунт</h1>
+      <p class="muted auth-subtitle" data-i18n="auth.subtitle">Данные хранятся в облаке и доступны с любого устройства</p>
+      <div class="segmented segmented-lg" id="authMode" data-active="login">
+        <button type="button" class="seg active" data-type="login" data-i18n="auth.login">Вход</button>
+        <button type="button" class="seg" data-type="register" data-i18n="auth.register">Регистрация</button>
+      </div>
+      <form id="authForm" novalidate>
+        <label class="field">
+          <span data-i18n="auth.email">Электронная почта</span>
+          <input type="email" id="authEmail" class="input" autocomplete="email" inputmode="email" maxlength="254" required>
+        </label>
+        <label class="field">
+          <span data-i18n="auth.password">Пароль</span>
+          <input type="password" id="authPassword" class="input" autocomplete="current-password" maxlength="200" required>
+          <small class="hint auth-hint" id="authHint" data-i18n="auth.passwordHint" hidden>Не короче 8 символов</small>
+        </label>
+        <p class="error auth-error" id="authError" role="alert"></p>
+        <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Войти</button>
+      </form>
+    </div>
+  </section>
 
   <!-- ===== Модалка операции ===== -->
   <div class="modal" id="txModal" hidden>

@@ -1,0 +1,6 @@
+# на Vercel уходят только сайт и API
+physic/
+scripts/
+README.md
+.env
+.env.*

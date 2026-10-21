@@ -18,6 +18,28 @@ const I18N = {
     'lang.label': 'Язык',
     'lang.changed': 'Язык: русский',
 
+    'auth.title': 'Вход в аккаунт',
+    'auth.titleRegister': 'Создание аккаунта',
+    'auth.subtitle': 'Данные хранятся в облаке и доступны с любого устройства',
+    'auth.login': 'Вход',
+    'auth.register': 'Регистрация',
+    'auth.email': 'Электронная почта',
+    'auth.password': 'Пароль',
+    'auth.passwordHint': 'Не короче 8 символов',
+    'auth.submitLogin': 'Войти',
+    'auth.submitRegister': 'Создать аккаунт',
+    'auth.busy': 'Подождите…',
+    'auth.logout': 'Выйти',
+    'auth.err.invalid': 'Неверная почта или пароль',
+    'auth.err.taken': 'Аккаунт с такой почтой уже есть — войдите',
+    'auth.err.email': 'Введите корректную почту',
+    'auth.err.password': 'Пароль должен быть не короче 8 символов',
+    'auth.err.network': 'Сервер недоступен, попробуйте ещё раз',
+    'toast.welcome': 'Добро пожаловать!',
+    'toast.migrated': 'Данные с этого устройства перенесены в аккаунт',
+    'toast.syncFailed': 'Не удалось сохранить в облако — проверьте интернет',
+    'settings.cloudHint': 'Данные хранятся в облаке (Neon) и доступны после входа с любого устройства.',
+
     'nav.aria': 'Навигация',
     'nav.dashboard': 'Дашборд',
     'nav.transactions': 'Операции',
@@ -223,6 +245,28 @@ const I18N = {
     formatDate: d => `${d.getDate()}-${I18N.uz.months[d.getMonth()]}, ${d.getFullYear()}`,
     'lang.label': 'Til',
     'lang.changed': 'Til: o‘zbekcha',
+
+    'auth.title': 'Hisobga kirish',
+    'auth.titleRegister': 'Hisob yaratish',
+    'auth.subtitle': 'Ma’lumotlar bulutda saqlanadi va istalgan qurilmadan ochiladi',
+    'auth.login': 'Kirish',
+    'auth.register': 'Ro‘yxatdan o‘tish',
+    'auth.email': 'Elektron pochta',
+    'auth.password': 'Parol',
+    'auth.passwordHint': 'Kamida 8 ta belgi',
+    'auth.submitLogin': 'Kirish',
+    'auth.submitRegister': 'Hisob yaratish',
+    'auth.busy': 'Kuting…',
+    'auth.logout': 'Chiqish',
+    'auth.err.invalid': 'Pochta yoki parol noto‘g‘ri',
+    'auth.err.taken': 'Bu pochta bilan hisob mavjud — kiring',
+    'auth.err.email': 'To‘g‘ri pochta manzilini kiriting',
+    'auth.err.password': 'Parol kamida 8 ta belgidan iborat bo‘lishi kerak',
+    'auth.err.network': 'Server javob bermayapti, qayta urinib ko‘ring',
+    'toast.welcome': 'Xush kelibsiz!',
+    'toast.migrated': 'Bu qurilmadagi ma’lumotlar hisobingizga ko‘chirildi',
+    'toast.syncFailed': 'Bulutga saqlab bo‘lmadi — internetni tekshiring',
+    'settings.cloudHint': 'Ma’lumotlar bulutda (Neon) saqlanadi va kirgandan so‘ng istalgan qurilmada ochiladi.',
 
     'nav.aria': 'Navigatsiya',
     'nav.dashboard': 'Asosiy',
@@ -498,9 +542,14 @@ function defaultState() {
 const Store = {
   state: null,
 
+  /** Ключ в браузере: у вошедшего пользователя — свой (копия облачных данных на устройстве) */
+  key() {
+    return Cloud.user ? `${STORAGE_KEY}:${Cloud.user.email}` : STORAGE_KEY;
+  },
+
   load() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(this.key());
       this.state = raw ? normalizeState(JSON.parse(raw)) : defaultState();
     } catch (e) {
       console.warn('Не удалось прочитать данные, используется состояние по умолчанию', e);
@@ -508,9 +557,15 @@ const Store = {
     }
   },
 
+  /** Сохраняет в браузер и, если пользователь вошёл, — в облако (Neon) */
   save() {
+    this.cache();
+    Cloud.schedule();
+  },
+
+  cache() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      localStorage.setItem(this.key(), JSON.stringify(this.state));
     } catch (e) {
       toast(t('toast.saveFailed'), 'error');
     }
@@ -521,6 +576,97 @@ const Store = {
     this.save();
   },
 };
+
+/* =========================================================
+   Облако: аккаунт и синхронизация через API на Vercel (данные — в Neon)
+   Если API нет (GitHub Pages, локальный просмотр) — приложение работает
+   как раньше: без входа, данные только в браузере.
+   ========================================================= */
+const Cloud = {
+  enabled: false, // есть сервер с API
+  user: null,     // { email } вошедшего пользователя
+  timer: null,
+  warned: false,
+
+  async request(path, { method = 'GET', body, keepalive = false } = {}) {
+    const res = await fetch(`/api/${path}`, {
+      method,
+      credentials: 'same-origin',
+      keepalive,
+      headers: body ? { 'Content-Type': 'application/json' } : {},
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  },
+
+  /** 'local' — сервера нет, 'guest' — нужен вход, 'user' — уже вошли */
+  async init() {
+    try {
+      const r = await this.request('me');
+      if (r.status === 401) { this.enabled = true; return 'guest'; }
+      if (!r.ok || !r.data.user) return 'local';
+      this.enabled = true;
+      this.user = r.data.user;
+      await this.pull();
+      return 'user';
+    } catch {
+      return 'local';
+    }
+  },
+
+  /** Загружает данные аккаунта; у нового аккаунта — переносит туда данные этого устройства */
+  async pull() {
+    const r = await this.request('data');
+    if (!r.ok) throw new Error(`pull failed: ${r.status}`);
+    if (r.data.data) {
+      Store.state = normalizeState(r.data.data);
+      Store.cache();
+      return { migrated: false };
+    }
+    // новый аккаунт: в облако уходит то, что было на устройстве до входа (или чистый лист)
+    const migrated = Store.state.transactions.length > 0;
+    Store.cache();
+    await this.push();
+    return { migrated };
+  },
+
+  /** Сохранение в облако — с задержкой, чтобы серия правок ушла одним запросом */
+  schedule() {
+    if (!this.user) return;
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.push(), 700);
+  },
+
+  async push({ keepalive = false } = {}) {
+    clearTimeout(this.timer);
+    this.timer = null;
+    if (!this.user) return;
+    try {
+      const r = await this.request('data', { method: 'PUT', body: { data: Store.state }, keepalive });
+      if (r.status === 401) return location.reload(); // сессия истекла — на экран входа
+      if (!r.ok) throw new Error(`push failed: ${r.status}`);
+      this.warned = false;
+    } catch (e) {
+      console.warn(e);
+      if (!this.warned) toast(t('toast.syncFailed'), 'error');
+      this.warned = true;
+    }
+  },
+
+  /** Отправить отложенное сохранение немедленно (перед выходом, закрытием вкладки) */
+  flush(opts) {
+    return this.timer ? this.push(opts) : Promise.resolve();
+  },
+};
+
+/** Режим экрана входа: 'login' или 'register' */
+let authMode = 'login';
+
+// при закрытии или сворачивании вкладки несохранённые правки уходят сразу
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') Cloud.flush({ keepalive: true });
+});
 
 function normalizeState(s) {
   const base = defaultState();
@@ -1830,10 +1976,14 @@ function translateStatic() {
   });
   document.documentElement.lang = lang();
   document.title = t('app.title');
-  // переключатель: подложка уезжает под выбранный язык
-  const sw = $('#langSwitch');
-  sw.dataset.lang = lang();
-  $$('button', sw).forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang())));
+  // переключатели (в шапке и на экране входа): подложка уезжает под выбранный язык
+  $$('.lang-switch').forEach(sw => {
+    sw.dataset.lang = lang();
+    $$('button', sw).forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang())));
+  });
+  // кнопка экрана входа зависит от режима «Вход / Регистрация»
+  $('#authSubmit').textContent = t(authMode === 'login' ? 'auth.submitLogin' : 'auth.submitRegister');
+  $('#authTitle').textContent = t(authMode === 'login' ? 'auth.title' : 'auth.titleRegister');
 }
 
 /** Применяет язык ко всему приложению */
@@ -1860,8 +2010,8 @@ function applyLanguage({ animate = false } = {}) {
   }
 }
 
-$('#langSwitch').addEventListener('click', e => {
-  const btn = e.target.closest('button[data-lang]');
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.lang-switch button[data-lang]');
   if (!btn || btn.dataset.lang === lang()) return;
   Settings.update({ lang: btn.dataset.lang });
   applyLanguage({ animate: true });
@@ -1881,19 +2031,119 @@ function renderAll() {
   renderSettings();
 }
 
-// страница всегда открывается сверху (браузер не восстанавливает старую прокрутку),
-// чтобы анимации карточек шли по порядку при прокрутке вниз
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-Store.load();
-applyTheme();
-applyLanguage(); // переводит разметку и рисует все разделы
-showView(location.hash.slice(1) || 'dashboard');
-// Включаем анимацию «пилюли» только после первой отрисовки, чтобы она не «прилетала» при загрузке
-requestAnimationFrame(() => requestAnimationFrame(() => $('#tabbar').classList.add('ready')));
+/* =========================================================
+   Аккаунт: экран входа / регистрации и меню в шапке
+   ========================================================= */
+function setAuthMode(mode) {
+  authMode = mode;
+  $$('#authMode .seg').forEach(b => b.classList.toggle('active', b.dataset.type === mode));
+  moveSegPill($('#authMode'), mode);
+  $('#authPassword').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
+  $('#authHint').hidden = mode === 'login';
+  $('#authError').textContent = '';
+  translateStatic();
+}
+
+function showAuth() {
+  document.body.classList.remove('booting');
+  document.body.classList.add('auth-mode');
+  $('#authScreen').hidden = false;
+  setTimeout(() => $('#authEmail').focus(), 50);
+}
+
+$('#authMode').addEventListener('click', e => {
+  const btn = e.target.closest('.seg');
+  if (btn && btn.dataset.type !== authMode) setAuthMode(btn.dataset.type);
+});
+
+const AUTH_ERRORS = {
+  invalid_credentials: 'auth.err.invalid',
+  email_taken: 'auth.err.taken',
+  invalid_email: 'auth.err.email',
+  weak_password: 'auth.err.password',
+};
+
+$('#authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('#authEmail').value.trim();
+  const password = $('#authPassword').value;
+  const error = $('#authError');
+  error.textContent = '';
+  // проверка до отправки — сразу понятная подсказка
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { error.textContent = t('auth.err.email'); return; }
+  if (authMode === 'register' && password.length < 8) { error.textContent = t('auth.err.password'); return; }
+  if (!password) { error.textContent = t('auth.err.invalid'); return; }
+
+  const submit = $('#authSubmit');
+  submit.disabled = true;
+  submit.textContent = t('auth.busy');
+  try {
+    const r = await Cloud.request(authMode, { method: 'POST', body: { email, password } });
+    if (!r.ok) {
+      error.textContent = t(AUTH_ERRORS[r.data.error] || 'auth.err.network');
+      return;
+    }
+    Cloud.user = r.data.user;
+    const { migrated } = await Cloud.pull();
+    $('#authPassword').value = '';
+    startApp();
+    toast(t(migrated ? 'toast.migrated' : 'toast.welcome'));
+  } catch (err) {
+    console.warn(err);
+    error.textContent = t('auth.err.network');
+  } finally {
+    submit.disabled = false;
+    translateStatic(); // вернуть текст кнопки
+  }
+});
+
+function renderAccount() {
+  const box = $('#account');
+  box.hidden = !Cloud.user;
+  if (!Cloud.user) return;
+  $('#accountEmail').textContent = Cloud.user.email;
+  $('#accountAvatar').textContent = Cloud.user.email.charAt(0).toUpperCase();
+  // в настройках — подсказка, что данные теперь в облаке
+  $('#dataHint').dataset.i18n = 'settings.cloudHint';
+}
+
+$('#logoutBtn').addEventListener('click', async () => {
+  await Cloud.flush();
+  await Cloud.request('logout', { method: 'POST' }).catch(() => {});
+  try { localStorage.removeItem(Store.key()); } catch { /* ничего страшного */ }
+  location.reload(); // заново — уже на экран входа
+});
+
+/* =========================================================
+   Запуск
+   ========================================================= */
+function startApp() {
+  document.body.classList.remove('booting', 'auth-mode');
+  $('#authScreen').hidden = true;
+  renderAccount();
+  applyTheme();
+  applyLanguage(); // переводит разметку и рисует все разделы
+  currentView = null;
+  showView(location.hash.slice(1) || 'dashboard');
+  // Включаем анимацию «пилюли» только после первой отрисовки, чтобы она не «прилетала» при загрузке
+  requestAnimationFrame(() => requestAnimationFrame(() => $('#tabbar').classList.add('ready')));
+}
+
+(async function boot() {
+  // страница всегда открывается сверху (браузер не восстанавливает старую прокрутку),
+  // чтобы анимации карточек шли по порядку при прокрутке вниз
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  Store.load(); // настройки устройства: язык и тема нужны уже экрану входа
+  applyTheme();
+  translateStatic();
+  const mode = await Cloud.init();
+  if (mode === 'guest') showAuth();
+  else startApp();
+})();
 
 // Синхронизация между вкладками
 window.addEventListener('storage', e => {
-  if (e.key !== STORAGE_KEY) return;
+  if (e.key !== Store.key()) return;
   Store.load();
   applyTheme();
   applyLanguage();

@@ -1,0 +1,15 @@
+{
+  "name": "finance-tracker",
+  "private": true,
+  "type": "module",
+  "description": "Трекер доходов и расходов: фронтенд + API на Vercel, данные в Neon Postgres",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "migrate": "node scripts/migrate.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}

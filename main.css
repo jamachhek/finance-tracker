@@ -1085,3 +1085,89 @@ p { margin: 0; }
   .header-actions .input-sm { flex: 1; }
   .chart-donut { flex-basis: 100%; max-width: 220px; margin: 0 auto; }
 }
+
+/* ===================== Аккаунт: вход / регистрация ===================== */
+/* пока выясняется, вошёл ли пользователь, интерфейс не мигает пустыми карточками */
+body.booting .app,
+body.booting .navbar,
+body.auth-mode .app { visibility: hidden; }
+
+.auth {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  border: 1px solid var(--glass-border);
+  border-radius: 36px;
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--rim), 0 24px 70px rgba(0, 0, 0, .22);
+  animation: pop .45s cubic-bezier(.34, 1.3, .64, 1);
+}
+.auth-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 26px; }
+.auth h1 { font-size: 24px; }
+.auth-subtitle { margin: 6px 0 20px; font-size: 14px; }
+.auth-hint { margin: 2px 0 0; }
+.auth-error { min-height: 1.2em; margin: -4px 0 12px; }
+.auth-submit { width: 100%; padding: 13px 20px; font-size: 15px; }
+.auth-submit:disabled { opacity: .7; cursor: progress; }
+
+/* переключатель «Вход / Регистрация»: пилюля бирюзовая ↔ синяя */
+.segmented-lg[data-active="login"]::before { --tint: var(--primary); }
+.segmented-lg[data-active="register"]::before { --tint: var(--frame-hi); transform: translateX(100%); }
+
+/* меню аккаунта в шапке */
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 4px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--rim), 0 8px 22px -8px rgba(15, 30, 60, .3);
+}
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(120% 80% at 30% 0%, rgba(255, 255, 255, .4), transparent 60%), var(--frame-hi);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+.account-email { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
+.account-logout {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease;
+}
+.account-logout:hover { background: var(--expense-soft); color: var(--expense); }
+.account-logout svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 560px) {
+  .account-email { display: none; }
+  .auth-card { padding: 22px; border-radius: 30px; }
+}
