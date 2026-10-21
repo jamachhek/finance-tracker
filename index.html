@@ -305,6 +305,11 @@
           <input type="password" id="authPassword" class="input" autocomplete="current-password" maxlength="200" required>
           <small class="hint auth-hint" id="authHint" data-i18n="auth.passwordHint" hidden>Не короче 8 символов</small>
         </label>
+        <!-- при регистрации пароль вводится дважды -->
+        <label class="field" id="authRepeatField" hidden>
+          <span data-i18n="auth.passwordRepeat">Повторите пароль</span>
+          <input type="password" id="authPassword2" class="input" autocomplete="new-password" maxlength="200">
+        </label>
         <p class="error auth-error" id="authError" role="alert"></p>
         <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Войти</button>
       </form>

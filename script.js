@@ -26,6 +26,8 @@ const I18N = {
     'auth.email': 'Электронная почта',
     'auth.password': 'Пароль',
     'auth.passwordHint': 'Не короче 8 символов',
+    'auth.passwordRepeat': 'Повторите пароль',
+    'auth.err.mismatch': 'Пароли не совпадают',
     'auth.submitLogin': 'Войти',
     'auth.submitRegister': 'Создать аккаунт',
     'auth.busy': 'Подождите…',
@@ -254,6 +256,8 @@ const I18N = {
     'auth.email': 'Elektron pochta',
     'auth.password': 'Parol',
     'auth.passwordHint': 'Kamida 8 ta belgi',
+    'auth.passwordRepeat': 'Parolni takrorlang',
+    'auth.err.mismatch': 'Parollar mos kelmadi',
     'auth.submitLogin': 'Kirish',
     'auth.submitRegister': 'Hisob yaratish',
     'auth.busy': 'Kuting…',
@@ -2040,6 +2044,9 @@ function setAuthMode(mode) {
   moveSegPill($('#authMode'), mode);
   $('#authPassword').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
   $('#authHint').hidden = mode === 'login';
+  $('#authRepeatField').hidden = mode === 'login';
+  $('#authPassword2').value = '';
+  $('#authPassword2').classList.remove('invalid');
   $('#authError').textContent = '';
   translateStatic();
 }
@@ -2072,6 +2079,12 @@ $('#authForm').addEventListener('submit', async e => {
   // проверка до отправки — сразу понятная подсказка
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { error.textContent = t('auth.err.email'); return; }
   if (authMode === 'register' && password.length < 8) { error.textContent = t('auth.err.password'); return; }
+  if (authMode === 'register' && password !== $('#authPassword2').value) {
+    error.textContent = t('auth.err.mismatch');
+    $('#authPassword2').classList.add('invalid');
+    $('#authPassword2').focus();
+    return;
+  }
   if (!password) { error.textContent = t('auth.err.invalid'); return; }
 
   const submit = $('#authSubmit');
@@ -2096,6 +2109,14 @@ $('#authForm').addEventListener('submit', async e => {
     translateStatic(); // вернуть текст кнопки
   }
 });
+
+// пока вводят повтор пароля, рамка подсказывает: красная — не совпадает, обычная — совпало
+['#authPassword', '#authPassword2'].forEach(sel => $(sel).addEventListener('input', () => {
+  const repeat = $('#authPassword2');
+  const mismatch = repeat.value && repeat.value !== $('#authPassword').value.slice(0, repeat.value.length);
+  repeat.classList.toggle('invalid', Boolean(mismatch));
+  if (!mismatch && $('#authError').textContent === t('auth.err.mismatch')) $('#authError').textContent = '';
+}));
 
 function renderAccount() {
   const box = $('#account');
