@@ -8,12 +8,12 @@ export default async function handler(req, res) {
   try {
     const { email: rawEmail, password } = body(req);
     const email = normalizeEmail(rawEmail);
-    const [user] = await sql`select id, password_hash from users where email = ${email}`;
+    const [user] = await sql`select id, password_hash, session_version from users where email = ${email}`;
     // одинаковый ответ для «нет такой почты» и «неверный пароль» — не подсказываем, какие почты зарегистрированы
     if (!user || typeof password !== 'string' || !verifyPassword(password, user.password_hash)) {
       return send(res, 401, { error: 'invalid_credentials' });
     }
-    send(res, 200, { user: { email } }, sessionCookie(Number(user.id)));
+    send(res, 200, { user: { email } }, sessionCookie(Number(user.id), Number(user.session_version)));
   } catch (err) {
     fail(res, err);
   }

@@ -1171,3 +1171,59 @@ body.auth-mode .app { visibility: hidden; }
   .account-email { display: none; }
   .auth-card { padding: 22px; border-radius: 30px; }
 }
+
+/* ---------- Восстановление пароля по коду из письма ---------- */
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -6px 0 10px -6px;
+  padding: 6px 10px 6px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease;
+}
+.auth-back:hover { background: var(--glass-tint); color: var(--text); }
+.auth-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+.auth-link {
+  display: block;
+  margin: -6px 0 12px auto;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-link:hover { text-decoration: underline; }
+.auth-link:disabled { color: var(--muted); cursor: default; text-decoration: none; }
+.auth-resend { margin: 12px auto 0; }
+
+.auth-info {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* поле кода: крупные цифры с разрядкой */
+.input.auth-code {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: .5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.input.auth-code::placeholder { color: var(--muted); opacity: .5; }

@@ -289,8 +289,13 @@
           <button type="button" role="radio" data-lang="uz" aria-checked="false" title="O‘zbekcha">UZ</button>
         </div>
       </div>
+      <!-- в режимах «Забыли пароль?» — кнопка назад ко входу -->
+      <button type="button" class="auth-back" id="authBack" hidden>
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+        <span data-i18n="auth.back">Ко входу</span>
+      </button>
       <h1 id="authTitle">Вход в аккаунт</h1>
-      <p class="muted auth-subtitle" data-i18n="auth.subtitle">Данные хранятся в облаке и доступны с любого устройства</p>
+      <p class="muted auth-subtitle" id="authSubtitle">Данные хранятся в облаке и доступны с любого устройства</p>
       <div class="segmented segmented-lg" id="authMode" data-active="login">
         <button type="button" class="seg active" data-type="login" data-i18n="auth.login">Вход</button>
         <button type="button" class="seg" data-type="register" data-i18n="auth.register">Регистрация</button>
@@ -300,18 +305,26 @@
           <span data-i18n="auth.email">Электронная почта</span>
           <input type="email" id="authEmail" class="input" autocomplete="email" inputmode="email" maxlength="254" required>
         </label>
-        <label class="field">
-          <span data-i18n="auth.password">Пароль</span>
+        <!-- код из письма (шаг 2 восстановления пароля) -->
+        <label class="field" id="authCodeField" hidden>
+          <span data-i18n="auth.code">Код из письма</span>
+          <input type="text" id="authCode" class="input auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+        </label>
+        <label class="field" id="authPasswordField">
+          <span id="authPasswordLabel">Пароль</span>
           <input type="password" id="authPassword" class="input" autocomplete="current-password" maxlength="200" required>
           <small class="hint auth-hint" id="authHint" data-i18n="auth.passwordHint" hidden>Не короче 8 символов</small>
         </label>
-        <!-- при регистрации пароль вводится дважды -->
+        <!-- при регистрации и смене пароля новый пароль вводится дважды -->
         <label class="field" id="authRepeatField" hidden>
           <span data-i18n="auth.passwordRepeat">Повторите пароль</span>
           <input type="password" id="authPassword2" class="input" autocomplete="new-password" maxlength="200">
         </label>
+        <button type="button" class="auth-link" id="authForgot" data-i18n="auth.forgot">Забыли пароль?</button>
+        <p class="auth-info" id="authInfo" role="status" hidden></p>
         <p class="error auth-error" id="authError" role="alert"></p>
         <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Войти</button>
+        <button type="button" class="auth-link auth-resend" id="authResend" hidden></button>
       </form>
     </div>
   </section>

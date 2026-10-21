@@ -28,6 +28,26 @@ const I18N = {
     'auth.passwordHint': 'Не короче 8 символов',
     'auth.passwordRepeat': 'Повторите пароль',
     'auth.err.mismatch': 'Пароли не совпадают',
+    'auth.newPassword': 'Новый пароль',
+    'auth.forgot': 'Забыли пароль?',
+    'auth.back': 'Ко входу',
+    'auth.titleForgot': 'Восстановление пароля',
+    'auth.subtitleForgot': 'Введите почту аккаунта — мы пришлём код из 6 цифр',
+    'auth.titleReset': 'Новый пароль',
+    'auth.subtitleReset': 'Введите код из письма и придумайте новый пароль',
+    'auth.submitForgot': 'Отправить код',
+    'auth.submitReset': 'Сменить пароль',
+    'auth.code': 'Код из письма',
+    'auth.codeSent': 'Если аккаунт с почтой {email} существует, мы отправили на неё код. Он действует 15 минут. Проверьте и папку «Спам».',
+    'auth.resend': 'Отправить код ещё раз',
+    'auth.resendIn': 'Отправить ещё раз можно через {s} с',
+    'auth.err.code': 'Введите 6 цифр из письма',
+    'auth.err.invalidCode': 'Неверный код. Осталось попыток: {n}',
+    'auth.err.codeExpired': 'Код устарел или уже использован — запросите новый',
+    'auth.err.attempts': 'Слишком много неверных попыток — запросите новый код',
+    'auth.err.tooMany': 'Слишком много запросов — попробуйте через час',
+    'auth.err.mailOff': 'Отправка писем ещё не настроена',
+    'toast.passwordChanged': 'Пароль изменён — вы вошли в аккаунт',
     'auth.submitLogin': 'Войти',
     'auth.submitRegister': 'Создать аккаунт',
     'auth.busy': 'Подождите…',
@@ -258,6 +278,26 @@ const I18N = {
     'auth.passwordHint': 'Kamida 8 ta belgi',
     'auth.passwordRepeat': 'Parolni takrorlang',
     'auth.err.mismatch': 'Parollar mos kelmadi',
+    'auth.newPassword': 'Yangi parol',
+    'auth.forgot': 'Parolni unutdingizmi?',
+    'auth.back': 'Kirishga qaytish',
+    'auth.titleForgot': 'Parolni tiklash',
+    'auth.subtitleForgot': 'Hisob pochtasini kiriting — 6 xonali kod yuboramiz',
+    'auth.titleReset': 'Yangi parol',
+    'auth.subtitleReset': 'Xatdagi kodni kiriting va yangi parol o‘ylab toping',
+    'auth.submitForgot': 'Kodni yuborish',
+    'auth.submitReset': 'Parolni almashtirish',
+    'auth.code': 'Xatdagi kod',
+    'auth.codeSent': 'Agar {email} pochtasi bilan hisob mavjud bo‘lsa, unga kod yubordik. Kod 15 daqiqa amal qiladi. «Spam» papkasini ham tekshiring.',
+    'auth.resend': 'Kodni qayta yuborish',
+    'auth.resendIn': 'Qayta yuborish {s} soniyadan keyin',
+    'auth.err.code': 'Xatdagi 6 ta raqamni kiriting',
+    'auth.err.invalidCode': 'Kod noto‘g‘ri. Qolgan urinishlar: {n}',
+    'auth.err.codeExpired': 'Kod eskirgan yoki ishlatilgan — yangisini so‘rang',
+    'auth.err.attempts': 'Juda ko‘p noto‘g‘ri urinish — yangi kod so‘rang',
+    'auth.err.tooMany': 'So‘rovlar juda ko‘p — bir soatdan keyin urinib ko‘ring',
+    'auth.err.mailOff': 'Xat yuborish hali sozlanmagan',
+    'toast.passwordChanged': 'Parol almashtirildi — hisobga kirdingiz',
     'auth.submitLogin': 'Kirish',
     'auth.submitRegister': 'Hisob yaratish',
     'auth.busy': 'Kuting…',
@@ -1985,9 +2025,8 @@ function translateStatic() {
     sw.dataset.lang = lang();
     $$('button', sw).forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang())));
   });
-  // кнопка экрана входа зависит от режима «Вход / Регистрация»
-  $('#authSubmit').textContent = t(authMode === 'login' ? 'auth.submitLogin' : 'auth.submitRegister');
-  $('#authTitle').textContent = t(authMode === 'login' ? 'auth.title' : 'auth.titleRegister');
+  // заголовок, подпись и кнопка экрана входа зависят от режима
+  translateAuth();
 }
 
 /** Применяет язык ко всему приложению */
@@ -2038,18 +2077,105 @@ function renderAll() {
 /* =========================================================
    Аккаунт: экран входа / регистрации и меню в шапке
    ========================================================= */
+/* Режимы экрана: login — вход, register — регистрация,
+   forgot — запрос кода на почту, reset — ввод кода и нового пароля */
+const AUTH_UI = {
+  login:    { title: 'auth.title',         subtitle: 'auth.subtitle',       submit: 'auth.submitLogin',    password: 'auth.password' },
+  register: { title: 'auth.titleRegister', subtitle: 'auth.subtitle',       submit: 'auth.submitRegister', password: 'auth.password' },
+  forgot:   { title: 'auth.titleForgot',   subtitle: 'auth.subtitleForgot', submit: 'auth.submitForgot',   password: 'auth.password' },
+  reset:    { title: 'auth.titleReset',    subtitle: 'auth.subtitleReset',  submit: 'auth.submitReset',    password: 'auth.newPassword' },
+};
+let resendTimer = null;
+let resendAt = 0;
+let codeSentTo = '';
+
+/** Тексты экрана входа на текущем языке (вызывается из translateStatic) */
+function translateAuth() {
+  const ui = AUTH_UI[authMode];
+  $('#authTitle').textContent = t(ui.title);
+  $('#authSubtitle').textContent = t(ui.subtitle);
+  $('#authSubmit').textContent = t(ui.submit);
+  $('#authPasswordLabel').textContent = t(ui.password);
+  if (authMode === 'reset') {
+    $('#authInfo').textContent = t('auth.codeSent', { email: codeSentTo });
+    updateResend();
+  }
+}
+
 function setAuthMode(mode) {
   authMode = mode;
-  $$('#authMode .seg').forEach(b => b.classList.toggle('active', b.dataset.type === mode));
-  moveSegPill($('#authMode'), mode);
+  const tabs = mode === 'login' || mode === 'register';
+  const newPassword = mode === 'register' || mode === 'reset';
+  $('#authMode').hidden = !tabs;
+  if (tabs) {
+    $$('#authMode .seg').forEach(b => b.classList.toggle('active', b.dataset.type === mode));
+    moveSegPill($('#authMode'), mode);
+  }
+  $('#authBack').hidden = tabs;
+  $('#authEmail').readOnly = mode === 'reset';
+  $('#authCodeField').hidden = mode !== 'reset';
+  $('#authPasswordField').hidden = mode === 'forgot';
   $('#authPassword').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
-  $('#authHint').hidden = mode === 'login';
-  $('#authRepeatField').hidden = mode === 'login';
+  $('#authHint').hidden = !newPassword;
+  $('#authRepeatField').hidden = !newPassword;
+  $('#authForgot').hidden = mode !== 'login';
+  $('#authInfo').hidden = mode !== 'reset';
+  $('#authResend').hidden = mode !== 'reset';
+  $('#authPassword').value = '';
   $('#authPassword2').value = '';
-  $('#authPassword2').classList.remove('invalid');
+  $('#authCode').value = '';
+  $$('#authForm .invalid').forEach(el => el.classList.remove('invalid'));
   $('#authError').textContent = '';
   translateStatic();
+  // фокус — на поле, которое заполняют первым
+  const first = mode === 'reset' ? '#authCode' : '#authEmail';
+  setTimeout(() => $(first).focus(), 30);
 }
+
+/** Кнопка «Отправить код ещё раз» доступна через 60 секунд после отправки */
+function updateResend() {
+  const btn = $('#authResend');
+  const left = Math.ceil((resendAt - Date.now()) / 1000);
+  btn.disabled = left > 0;
+  btn.textContent = left > 0 ? t('auth.resendIn', { s: left }) : t('auth.resend');
+  if (left <= 0) { clearInterval(resendTimer); resendTimer = null; }
+}
+
+function startResendTimer() {
+  resendAt = Date.now() + 60_000;
+  clearInterval(resendTimer);
+  resendTimer = setInterval(updateResend, 1000);
+  updateResend();
+}
+
+/** Запросить код на почту; true — письмо (возможно) отправлено */
+async function requestResetCode(email) {
+  const error = $('#authError');
+  const r = await Cloud.request('forgot', { method: 'POST', body: { email, lang: lang() } });
+  if (!r.ok) {
+    error.textContent = t(AUTH_ERRORS[r.data.error] || 'auth.err.network');
+    return false;
+  }
+  codeSentTo = email;
+  return true;
+}
+
+$('#authForgot').addEventListener('click', () => setAuthMode('forgot'));
+$('#authBack').addEventListener('click', () => setAuthMode('login'));
+$('#authResend').addEventListener('click', async () => {
+  const btn = $('#authResend');
+  btn.disabled = true;
+  $('#authError').textContent = '';
+  try {
+    if (await requestResetCode(codeSentTo)) startResendTimer();
+    else updateResend();
+  } catch {
+    $('#authError').textContent = t('auth.err.network');
+    updateResend();
+  }
+});
+// в поле кода — только цифры
+$('#authCode').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
 
 function showAuth() {
   document.body.classList.remove('booting');
@@ -2068,39 +2194,67 @@ const AUTH_ERRORS = {
   email_taken: 'auth.err.taken',
   invalid_email: 'auth.err.email',
   weak_password: 'auth.err.password',
+  code_expired: 'auth.err.codeExpired',
+  too_many_attempts: 'auth.err.attempts',
+  too_many_requests: 'auth.err.tooMany',
+  mail_not_configured: 'auth.err.mailOff',
 };
 
 $('#authForm').addEventListener('submit', async e => {
   e.preventDefault();
   const email = $('#authEmail').value.trim();
   const password = $('#authPassword').value;
+  const code = $('#authCode').value;
   const error = $('#authError');
+  const newPassword = authMode === 'register' || authMode === 'reset';
   error.textContent = '';
   // проверка до отправки — сразу понятная подсказка
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { error.textContent = t('auth.err.email'); return; }
-  if (authMode === 'register' && password.length < 8) { error.textContent = t('auth.err.password'); return; }
-  if (authMode === 'register' && password !== $('#authPassword2').value) {
+  if (authMode === 'reset' && !/^\d{6}$/.test(code)) {
+    error.textContent = t('auth.err.code');
+    $('#authCode').classList.add('invalid');
+    $('#authCode').focus();
+    return;
+  }
+  if (newPassword && password.length < 8) { error.textContent = t('auth.err.password'); return; }
+  if (newPassword && password !== $('#authPassword2').value) {
     error.textContent = t('auth.err.mismatch');
     $('#authPassword2').classList.add('invalid');
     $('#authPassword2').focus();
     return;
   }
-  if (!password) { error.textContent = t('auth.err.invalid'); return; }
+  if (authMode === 'login' && !password) { error.textContent = t('auth.err.invalid'); return; }
 
   const submit = $('#authSubmit');
   submit.disabled = true;
   submit.textContent = t('auth.busy');
   try {
-    const r = await Cloud.request(authMode, { method: 'POST', body: { email, password } });
-    if (!r.ok) {
-      error.textContent = t(AUTH_ERRORS[r.data.error] || 'auth.err.network');
+    // шаг 1 восстановления: отправить код и перейти к его вводу
+    if (authMode === 'forgot') {
+      if (await requestResetCode(email)) {
+        setAuthMode('reset');
+        startResendTimer();
+      }
       return;
     }
+    const body = authMode === 'reset' ? { email, code, password } : { email, password };
+    const r = await Cloud.request(authMode, { method: 'POST', body });
+    if (!r.ok) {
+      const err = r.data.error;
+      error.textContent = err === 'invalid_code'
+        ? t('auth.err.invalidCode', { n: r.data.attemptsLeft ?? '—' })
+        : t(AUTH_ERRORS[err] || 'auth.err.network');
+      if (err === 'invalid_code') { $('#authCode').classList.add('invalid'); $('#authCode').select(); }
+      return;
+    }
+    const wasReset = authMode === 'reset';
     Cloud.user = r.data.user;
     const { migrated } = await Cloud.pull();
     $('#authPassword').value = '';
+    $('#authPassword2').value = '';
+    clearInterval(resendTimer);
     startApp();
-    toast(t(migrated ? 'toast.migrated' : 'toast.welcome'));
+    toast(t(wasReset ? 'toast.passwordChanged' : migrated ? 'toast.migrated' : 'toast.welcome'));
   } catch (err) {
     console.warn(err);
     error.textContent = t('auth.err.network');

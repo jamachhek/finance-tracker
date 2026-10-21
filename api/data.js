@@ -1,7 +1,7 @@
 // GET /api/data — данные пользователя (операции, категории, настройки)
 // PUT /api/data { data } — сохранить их
 import { sql } from './_lib/db.js';
-import { getUserId } from './_lib/auth.js';
+import { requireUser } from './_lib/auth.js';
 import { send, body, allow, fail } from './_lib/http.js';
 
 const MAX_BYTES = 2_000_000; // ~2 МБ на пользователя — это десятки тысяч операций
@@ -9,8 +9,9 @@ const MAX_BYTES = 2_000_000; // ~2 МБ на пользователя — это
 export default async function handler(req, res) {
   if (!allow(req, res, ['GET', 'PUT'])) return;
   try {
-    const uid = getUserId(req);
-    if (!uid) return send(res, 401, { error: 'unauthorized' });
+    const user = await requireUser(req, sql);
+    if (!user) return send(res, 401, { error: 'unauthorized' });
+    const uid = user.id;
 
     if (req.method === 'GET') {
       const [row] = await sql`select data, updated_at from user_data where user_id = ${uid}`;
